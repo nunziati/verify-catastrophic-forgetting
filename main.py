@@ -52,16 +52,6 @@ class DatasetMerger(torch.utils.data.Dataset):
             example_index_array = np.argsort(dataset.targets).reshape((1, dim))
             array = np.concatenate((dataset_index_array, example_index_array))
             data_indexes_list.append(array)
-        """last_index = 0
-        for dataset in self.datasets_list:
-            data_indexes_list.append(self.data_indexes[last_index:last_index+len(dataset), :])
-            last_index += len(dataset)
-
-        for dataset, data_indexes in zip(self.datasets_list, data_indexes_list):
-            label_array = np.empty(len(dataset), dtype=np.int64)
-            for index, example_index in enumerate(data_indexes[:, 1]):
-                label_array[index] = dataset[example_index][1]
-            data_indexes[:, 1] = data_indexes[np.argsort(label_array), 1]"""
         self.data_indexes = np.concatenate(data_indexes_list, axis=1).transpose()
 
 class ShallowMLP(torch.nn.Module):
