@@ -1,17 +1,26 @@
 import torch
 
 class DatasetMerger(torch.utils.data.Dataset):
-    def __init__(self, datasets_list, mode="torch"):
+    def __init__(self, datasets_list, mode="torch", set_labels_from=None):
         self.datasets_list = datasets_list
+
+        if set_labels_from is None:
+            self.class_map = {}
+        else:
+            self.class_map = set_labels_from.class_map
+
         data_indexes_list = []
-        self.class_map = {}
+
         for dataset_index, dataset in enumerate(self.datasets_list):
             n_samples = len(dataset)
             dataset_index_array = torch.full((1, n_samples), dataset_index, dtype=torch.int64)
             example_index_array = torch.arange(n_samples, dtype=torch.int64).reshape((1, -1))
             data_index_array = torch.cat((dataset_index_array, example_index_array))
             data_indexes_list.append(data_index_array)
-            self.class_map.update({(dataset_index, x.item()): x.item() + len(self.class_map) for x in torch.unique(torch.tensor(dataset.targets), sorted=True)})
+            
+            if set_labels_from is None:
+                self.class_map.update({(dataset_index, x.item()): x.item() + len(self.class_map) for x in torch.unique(torch.tensor(dataset.targets), sorted=True)})
+        
         self.data_indexes = torch.cat(data_indexes_list, dim=1).transpose(0, 1)
         self.reverse_class_map = {self.class_map[x]: x for x in self.class_map}
 
@@ -23,6 +32,9 @@ class DatasetMerger(torch.utils.data.Dataset):
         data, label = self.datasets_list[dataset_index][example_index]
         label = self.class_map[(dataset_index, label)]
         return data, label
+
+    def __len__(self):
+        return self.data_indexes.shape[0]
 
     def shuffle(self):
         indexes = torch.randperm(self.data_indexes.shape[0])

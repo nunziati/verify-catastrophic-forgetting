@@ -32,8 +32,9 @@ if __name__ == "__main__":
 
     print("Sorting and merging datasets...")
     train_set = DatasetMerger((train_set_cifar10, train_set_mnist))
-    test_set = DatasetMerger((test_set_cifar10, test_set_mnist))
+    test_set = DatasetMerger((test_set_cifar10, test_set_mnist), set_labels_from=train_set)
     train_set.dataset_wise_sort_by_label()
+    test_set.dataset_wise_sort_by_label()
 
     train_set_loader = torch.utils.data.DataLoader(train_set, batch_size=1, shuffle=False, num_workers=2)
     test_set_loader = torch.utils.data.DataLoader(test_set, batch_size=64, shuffle=False, num_workers=2)
@@ -42,7 +43,12 @@ if __name__ == "__main__":
     print("Creating models...")
     net = ShallowMLP()
     net.to(torch.float32).to(device)
-    classifier = Classifier(net, )
+    
+    classifier = Classifier(net)
+
+    classifier.train_class_by_class(train_set_loader)
+
+    classifier.evaluate(test_set_loader, plot=True, always_plot=False)
     print("Models correctly created!")
 
     print("Starting the training procedure...")
