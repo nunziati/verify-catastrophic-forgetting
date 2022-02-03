@@ -10,11 +10,11 @@ class Classifier:
     def initialize_net(self):
         self.net.initialize()
 
-    def train_class_by_class(self, data, test_data=None, optimizer="adam", lr=0.01, weight_decay=0, plot=True, always_plot=False):
+    def train_class_by_class(self, data, test_data=None, optimizer="adam", lr=0.01, weight_decay=0, plot=True):
         training = self.net.training
         self.net.train()
 
-        n_classes = len(data.dataset.class_map)
+        n_classes = data.dataset.num_classes
 
         loss_function = torch.nn.CrossEntropyLoss()
 
@@ -45,7 +45,7 @@ class Classifier:
             opt.step()
             opt.zero_grad()
 
-        self.history = [current_label] = self.evaluate_class_by_class(test_data, plot)           
+        self.history[current_label] = self.evaluate_class_by_class(test_data, plot)           
 
         if not training: self.net.eval()
 
@@ -62,19 +62,34 @@ class Classifier:
 
         for img, label in data:
             output, _ = self.net(img)
-            output_labels = torch.argmax(output, dim=-1)
+            output_label = torch.argmax(output, dim=-1)
 
             total.add_(eye[label].sum(dim=0))
-            correct.add_((eye[label]*eye[output_labels]).sum(dim=0))
+            correct.add_((eye[label]*eye[output_label]).sum(dim=0))
 
         if training: self.net.train()
 
         return correct / total
 
+    def evaluate(self, data):
+        training = self.net.training
+        self.net.eval()
+
+        correct = 0
+
+        for img, label in data:
+            output, _ = self.net(img)
+            output_label = torch.argmax(output, dim=-1)
+            correct += torch.sum(torch.eq(label, output_label))
+
+        if training: self.net.train()
+
+        return correct / len(data)
+
     def plot(self):
         if self.history is None:
-            raise Exception("Before plotting, you should train the classifier.")
-        training = self.net.training
+            raise Exception("Before plotting, you should train the classifier providing test data.")
+        training = self.net.traininga
         self.net.eval()
 
         macro_accuracy = self.history.mean(dim=1)

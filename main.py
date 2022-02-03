@@ -39,19 +39,19 @@ if __name__ == "__main__":
     test_set_loader = torch.utils.data.DataLoader(test_set, batch_size=16, shuffle=False, num_workers=2)
     print("Training set correctly sorted!")
 
-    print("Creating models...")
+    print("Creating classifier...")
     net = ShallowMLP()
     net.to(torch.float32).to(device)
     
     classifier = Classifier(net)
-
-    classifier.train_class_by_class(train_set_loader, optimizer="sgd", lr=0.0001, weight_decay=0.3, test_data=test_set_loader)
-
-    print("Models correctly created!")
+    print("Classifier correctly created!")
 
     print("Starting the training procedure...")
-    # for each neural model: train()
+    classifier.train_class_by_class(train_set_loader, optimizer="sgd", lr=0.0001, weight_decay=0.3, test_data=test_set_loader)
     print("Training correctly completed!")
 
-    # plot the result
+    print("Evaluating classifier...")
+    accuracy = classifier.evaluate(test_set_loader)
+    print("Classifier evaluated...")
 
+    print("Accuracy: {:2.2f}%".format(accuracy*100))

@@ -23,6 +23,7 @@ class DatasetMerger(torch.utils.data.Dataset):
         
         self.data_indexes = torch.cat(data_indexes_list, dim=1).transpose(0, 1)
         self.reverse_class_map = {self.class_map[x]: x for x in self.class_map}
+        self.num_classes = len(self.class_map)
 
     def __getitem__(self, index):
         if isinstance(index, int):
