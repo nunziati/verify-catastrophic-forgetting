@@ -54,6 +54,6 @@ if __name__ == "__main__":
     accuracy = classifier.evaluate(test_set_loader)
     print("Classifier evaluated...")
 
-    classifier.plot()
-
     print("Accuracy: {:2.2f}%".format(accuracy*100))
+    
+    classifier.plot()

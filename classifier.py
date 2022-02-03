@@ -92,7 +92,7 @@ class Classifier:
     def plot(self):
         if self.history is None:
             raise Exception("Before plotting, you should train the classifier providing test data.")
-        training = self.net.traininga
+        training = self.net.training
         self.net.eval()
 
         macro_accuracy = self.history.mean(dim=1)
