@@ -80,9 +80,6 @@ class Classifier:
         for img, label in data:
             output, _ = self.net(img)
             output_label = torch.argmax(output, dim=-1)
-            print(label)
-            print(output_label)
-            print("==================================================")
             correct += torch.sum(torch.eq(label, output_label))
 
         if training: self.net.train()

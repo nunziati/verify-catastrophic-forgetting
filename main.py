@@ -55,5 +55,5 @@ if __name__ == "__main__":
     print("Classifier evaluated...")
 
     print("Accuracy: {:2.2f}%".format(accuracy*100))
-    
+
     classifier.plot()
