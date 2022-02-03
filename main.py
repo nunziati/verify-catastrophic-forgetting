@@ -45,9 +45,8 @@ if __name__ == "__main__":
     
     classifier = Classifier(net)
 
-    classifier.train_class_by_class(train_set_loader, optimizer="adam", lr=0.001, weight_decay=10000000, test_data=test_set_loader)
+    classifier.train_class_by_class(train_set_loader, optimizer="sgd", lr=0.0001, weight_decay=0.3, test_data=test_set_loader)
 
-    classifier.evaluate_class_by_class(test_set_loader, plot=True, always_plot=False)
     print("Models correctly created!")
 
     print("Starting the training procedure...")
