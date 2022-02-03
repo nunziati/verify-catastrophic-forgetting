@@ -34,10 +34,9 @@ if __name__ == "__main__":
     train_set = DatasetMerger((train_set_cifar10, train_set_mnist))
     test_set = DatasetMerger((test_set_cifar10, test_set_mnist), set_labels_from=train_set)
     train_set.dataset_wise_sort_by_label()
-    test_set.dataset_wise_sort_by_label()
 
     train_set_loader = torch.utils.data.DataLoader(train_set, batch_size=1, shuffle=False, num_workers=2)
-    test_set_loader = torch.utils.data.DataLoader(test_set, batch_size=64, shuffle=False, num_workers=2)
+    test_set_loader = torch.utils.data.DataLoader(test_set, batch_size=16, shuffle=False, num_workers=2)
     print("Training set correctly sorted!")
 
     print("Creating models...")
@@ -46,9 +45,9 @@ if __name__ == "__main__":
     
     classifier = Classifier(net)
 
-    classifier.train_class_by_class(train_set_loader)
+    classifier.train_class_by_class(train_set_loader, optimizer="adam", lr=0.001, weight_decay=10000000, test_data=test_set_loader)
 
-    classifier.evaluate(test_set_loader, plot=True, always_plot=False)
+    classifier.evaluate_class_by_class(test_set_loader, plot=True, always_plot=False)
     print("Models correctly created!")
 
     print("Starting the training procedure...")
