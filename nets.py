@@ -5,9 +5,9 @@ class ShallowMLP(torch.nn.Module):
         super(ShallowMLP, self).__init__()
 
         self.flatten = torch.nn.Flatten()
-        self.linear1 = torch.nn.Linear(28*28*3, 1000)
+        self.linear1 = torch.nn.Linear(28*28*3, 10000)
         self.sigmoid1 = torch.nn.Sigmoid()
-        self.linear2 = torch.nn.Linear(1000, 20)
+        self.linear2 = torch.nn.Linear(10000, 20)
         self.softmax = torch.nn.Softmax(dim=0)
 
     def forward(self, X):
@@ -25,7 +25,7 @@ class ShallowMLP(torch.nn.Module):
 
 class DeepMLP(torch.nn.Module):
     def __init__(self):
-        super(ShallowMLP, self).__init__()
+        super(DeepMLP, self).__init__()
 
         self.flatten = torch.nn.Flatten()
         self.linear1 = torch.nn.Linear(28*28*3, 100)
@@ -70,7 +70,7 @@ class DeepMLP(torch.nn.Module):
         O = self.linear9(O)
         O = self.sigmoid9(O)
         A = self.linear10(O)
-        O = self.softmax(O)
+        O = self.softmax(A)
 
         return O, A
     
@@ -80,12 +80,12 @@ class DeepMLP(torch.nn.Module):
 
 class ShallowCNN(torch.nn.Module):
     def __init__(self):
-        super(ShallowMLP, self).__init__()
+        super(ShallowCNN, self).__init__()
         
-        self.conv1 = torch.nn.Conv2d(3, 5, kernel_size=5)
+        self.conv1 = torch.nn.Conv2d(3, 5, kernel_size=5, padding="same")
         self.relu1 = torch.nn.ReLU()
         self.maxpool1 = torch.nn.MaxPool2d(kernel_size=2)
-        self.conv2 = torch.nn.Conv2d(5, 10, kernel_size=3)
+        self.conv2 = torch.nn.Conv2d(5, 10, kernel_size=3, padding="same")
         self.relu2 = torch.nn.ReLU()
         self.maxpool2 = torch.nn.MaxPool2d(kernel_size=2)
         self.flatten = torch.nn.Flatten()
@@ -101,7 +101,7 @@ class ShallowCNN(torch.nn.Module):
         O = self.maxpool2(O)
         O = self.flatten(O)
         A = self.linear(O)
-        O = self.softmax(O)
+        O = self.softmax(A)
 
         return O, A
     
@@ -111,20 +111,20 @@ class ShallowCNN(torch.nn.Module):
 
 class DeepCNN(torch.nn.Module):
     def __init__(self):
-        super(ShallowMLP, self).__init__()
+        super(DeepCNN, self).__init__()
         
-        self.conv1a = torch.nn.Conv2d(3, 5, kernel_size=5)
+        self.conv1a = torch.nn.Conv2d(3, 5, kernel_size=5, padding="same")
         self.relu1a = torch.nn.ReLU()
-        self.conv1b = torch.nn.Conv2d(5, 5, kernel_size=5)
+        self.conv1b = torch.nn.Conv2d(5, 5, kernel_size=5, padding="same")
         self.relu1b = torch.nn.ReLU()
-        self.conv1c = torch.nn.Conv2d(5, 5, kernel_size=5)
+        self.conv1c = torch.nn.Conv2d(5, 5, kernel_size=5, padding="same")
         self.relu1c = torch.nn.ReLU()
         self.maxpool1 = torch.nn.MaxPool2d(kernel_size=2)
-        self.conv2a = torch.nn.Conv2d(5, 10, kernel_size=3)
+        self.conv2a = torch.nn.Conv2d(5, 10, kernel_size=3, padding="same")
         self.relu2a = torch.nn.ReLU()
-        self.conv2b = torch.nn.Conv2d(10, 10, kernel_size=3)
+        self.conv2b = torch.nn.Conv2d(10, 10, kernel_size=3, padding="same")
         self.relu2b = torch.nn.ReLU()
-        self.conv2c = torch.nn.Conv2d(10, 10, kernel_size=3)
+        self.conv2c = torch.nn.Conv2d(10, 10, kernel_size=3, padding="same")
         self.relu2c = torch.nn.ReLU()
         self.maxpool2 = torch.nn.MaxPool2d(kernel_size=2)
         self.flatten = torch.nn.Flatten()
@@ -134,9 +134,9 @@ class DeepCNN(torch.nn.Module):
     def forward(self, X):
         O = self.conv1a(X)
         O = self.relu1a(O)
-        O = self.conv1b(X)
+        O = self.conv1b(O)
         O = self.relu1b(O)
-        O = self.conv1c(X)
+        O = self.conv1c(O)
         O = self.relu1c(O)
         O = self.maxpool1(O)
         O = self.conv2a(O)
@@ -148,7 +148,7 @@ class DeepCNN(torch.nn.Module):
         O = self.maxpool2(O)
         O = self.flatten(O)
         A = self.linear(O)
-        O = self.softmax(O)
+        O = self.softmax(A)
 
         return O, A
     

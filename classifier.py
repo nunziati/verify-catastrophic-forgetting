@@ -3,9 +3,12 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 class Classifier:
-    def __init__(self, net):
+    def __init__(self, net, device="cpu"):
+        self.device = torch.device(device)
         self.net = net
         self.history = None
+
+        self.net.to(self.device)
 
     def initialize_net(self):
         self.net.initialize()
@@ -30,7 +33,9 @@ class Classifier:
 
         i = 0
 
-        for img, label in data:            
+        for img, label in data:
+            img = img.to(self.device)
+            label = label.to(self.device)         
             if test_data is not None and label[0] != current_label:
                 self.history[current_label] = self.evaluate_class_by_class(test_data, plot)
                 current_label = label[0]
@@ -61,6 +66,8 @@ class Classifier:
         correct = torch.zeros((n_classes,))
 
         for img, label in data:
+            img = img.to(self.device)
+            label = label.to(self.device)
             output, _ = self.net(img)
             output_label = torch.argmax(output, dim=-1)
 
@@ -78,6 +85,8 @@ class Classifier:
         correct = 0
 
         for img, label in data:
+            img = img.to(self.device)
+            label = label.to(self.device)
             output, _ = self.net(img)
             output_label = torch.argmax(output, dim=-1)
             correct += torch.sum(torch.eq(label, output_label))
@@ -118,6 +127,6 @@ class Classifier:
         torch.save(classifier_state_dict, filename)
     
     def load(self, filename):
-        classifier_state_dict = torch.load(filename)
+        classifier_state_dict = torch.load(filename, map_location=self.device)
         self.net.load_state_dict(classifier_state_dict["net"])
         self.net.history = classifier_state_dict["history"]
