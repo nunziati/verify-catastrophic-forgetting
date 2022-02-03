@@ -17,7 +17,7 @@ def interactive():
 if __name__ == "__main__":
     start_time = time.time()
 
-    device = torch.device("cuda:0")
+    device = torch.device("cpu")
 
     print("Downloading datasets...")
     transform_cifar10 = transforms.Compose([transforms.Resize(28), transforms.ToTensor()])
@@ -39,14 +39,14 @@ if __name__ == "__main__":
     print("Training set correctly sorted!")
 
     print("Creating classifier...")
-    net = ShallowCNN()
+    net = ShallowMLP()
     net.to(torch.float32)
     
     classifier = Classifier(net, device)
     print("Classifier correctly created!")
 
     print("Starting the training procedure...")
-    classifier.train_class_by_class(train_set_loader, optimizer="sgd", lr=0.0001, weight_decay=0.3, test_data=test_set_loader)
+    classifier.train_class_by_class(train_set_loader, optimizer="sgd", lr=0.00003, weight_decay=0.3, test_data=test_set_loader)
     print("Training correctly completed!")
 
     print("Evaluating classifier...")

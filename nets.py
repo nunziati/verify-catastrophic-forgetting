@@ -1,5 +1,19 @@
 import torch
 
+
+class MyConv2d(torch.nn.Conv2d):
+    def __init__(self, in_maps, out_maps, padding="same", **kwargs):
+        # this only works for odd kernel_size values or components
+        if isinstance(padding, str):
+            if padding == "same":
+                if isinstance(kwargs["kernel_size"], int):
+                    padding = (kwargs["kernel_size"] - 1) // 2
+                elif isinstance(kwargs["kernel_size"], tuple):
+                    padding = ((x - 1) // 2 for x in kwargs["kernel_size"])
+                else: raise TypeError("kernel_size must be int or tuple of int")
+            else: raise ValueError("padding str must be 'same'")
+        super(MyConv2d, self).__init__(in_maps, out_maps, padding=padding, **kwargs)
+
 class ShallowMLP(torch.nn.Module):
     def __init__(self):
         super(ShallowMLP, self).__init__()
@@ -82,10 +96,10 @@ class ShallowCNN(torch.nn.Module):
     def __init__(self):
         super(ShallowCNN, self).__init__()
         
-        self.conv1 = torch.nn.Conv2d(3, 5, kernel_size=5, padding="same")
+        self.conv1 = MyConv2d(3, 5, kernel_size=5, padding="same")
         self.relu1 = torch.nn.ReLU()
         self.maxpool1 = torch.nn.MaxPool2d(kernel_size=2)
-        self.conv2 = torch.nn.Conv2d(5, 10, kernel_size=3, padding="same")
+        self.conv2 = MyConv2d(5, 10, kernel_size=3, padding="same")
         self.relu2 = torch.nn.ReLU()
         self.maxpool2 = torch.nn.MaxPool2d(kernel_size=2)
         self.flatten = torch.nn.Flatten()
