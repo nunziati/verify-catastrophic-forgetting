@@ -15,7 +15,7 @@ class Classifier:
     def initialize_net(self):
         self.net.initialize()
 
-    def train_class_by_class(self, data, test_data=None, optimizer="adam", lr=0.01, weight_decay=0, plot=True):
+    def train_class_by_class(self, data, test_data=None, optimizer="adam", lr=0.01, weight_decay=0, plot=True, **kwargs):
         training = self.net.training
         self.net.train()
 
@@ -41,7 +41,7 @@ class Classifier:
 
             for img, label in zip(img_mini_batch, label_mini_batch):
                 if test_data is not None and label.item() != current_label:
-                    self.history[current_label] = self.evaluate_class_by_class(test_data, plot)
+                    self.history[current_label] = self.evaluate_class_by_class(test_data)
                     current_label = label.item()
                 _, logits = self.net(img.view((1, *img.shape)))
                 loss = loss_function(logits, label.view((1,)))
@@ -52,33 +52,36 @@ class Classifier:
                 opt.step()
                 opt.zero_grad()
 
-        self.history[current_label] = self.evaluate_class_by_class(test_data, plot)           
+        self.history[current_label] = self.evaluate_class_by_class(test_data)
+
+        if plot: self.plot(**kwargs)       
 
         if not training: self.net.eval()
 
-    def evaluate_class_by_class(self, data, plot=True, always_plot=False):
+    def evaluate_class_by_class(self, data):
         training = self.net.training
         self.net.eval()
 
         classes = sorted(list(data.dataset.class_map.values()))
         n_classes = len(classes)
         
-        eye = torch.eye(len(classes))
-        total = torch.zeros((n_classes,))
-        correct = torch.zeros((n_classes,))
+        eye = torch.eye(n_classes)
+        true_positive = torch.zeros((n_classes,)).to(self.device)
+        total = torch.zeros((n_classes,)).to(self.device)
 
         for img, label in data:
             img = img.to(self.device)
             label = label.to(self.device)
             output, _ = self.net(img)
-            output_label = torch.argmax(output, dim=-1)
+            output_label = torch.argmax(output, dim=-1).to(self.device)
 
-            total.add_(eye[label].sum(dim=0))
-            correct.add_((eye[label]*eye[output_label]).sum(dim=0))
+            for class_index, c in enumerate(classes):
+                true_positive[class_index] += torch.sum(torch.logical_and(label==c, output_label==c))
+                total[class_index] += torch.sum(label==c)
 
         if training: self.net.train()
 
-        return correct / total
+        return true_positive / total
 
     def evaluate(self, data):
         training = self.net.training
@@ -137,7 +140,7 @@ class Classifier:
 
         plt.show()
 
-    def save(self,, subdir="", timestamp="", filename="model.pth"):
+    def save(self, subdir="", timestamp="", filename="model.pth"):
         classifier_state_dict = {
             "net_type": type(self.net),
             "net": self.net.state_dict(),
