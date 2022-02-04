@@ -7,15 +7,11 @@ from dataset import *
 from nets import *
 from classifier import *
 import time
+from datetime import datetime
 
-def interactive():
-    while(True):
-        a = input(">>> ")
-        if a=="q": break
-        exec(a)
-    
 if __name__ == "__main__":
     start_time = time.time()
+    timestamp = str(datetime.now()).replace(" ", "-")[:20]
 
     device = torch.device("cuda:0")
 
@@ -46,18 +42,18 @@ if __name__ == "__main__":
     print("Classifier correctly created!")
 
     print("Starting the training procedure...")
-    classifier.train_class_by_class(train_set_loader, optimizer="sgd", lr=0.00003, weight_decay=0.3, test_data=test_set_loader)
+    classifier.train_class_by_class(train_set_loader, optimizer="sgd", lr=0.00003, weight_decay=1, test_data=test_set_loader)
     print("Training correctly completed!")
 
-    classifier.save("test.pth")
-    
+    classifier.save(subdir="./models/", timestamp=timestamp)
+
     print("Evaluating classifier...")
     accuracy = classifier.evaluate(test_set_loader)
     print("Classifier evaluated...")
 
     print("Accuracy: {:2.2f}%".format(accuracy*100))
 
-    classifier.plot()
+    classifier.plot(subdir="./figures/", timestamp=timestamp)
 
     end_time = time.time()
 

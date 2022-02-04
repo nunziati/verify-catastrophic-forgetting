@@ -97,7 +97,7 @@ class Classifier:
 
         return correct / len(data.dataset)
 
-    def plot(self, subplot="class"):
+    def plot(self, subplot="class", subdir="", timestamp="", filename1="accuracy_class_by_cass.jpg", filename2="accuracy.jpg"):
         if self.history is None:
             raise Exception("Before plotting, you should train the classifier providing test data.")
 
@@ -130,20 +130,23 @@ class Classifier:
         ax.bar(torch.arange(0, 20), macro_accuracy)
         ax.set_ylim([0, 1])
 
-        timestamp = str(datetime.now()).replace(" ", "-")[:20]
-        f.savefig("./figures/" + timestamp + "accuracy_class_by_cass.jpg")
-        f_macro.savefig("./figures/" + timestamp + "_accuracy.jpg")
-        
+        if timestamp == "infer": timestamp = str(datetime.now()).replace(" ", "-")[:20]
+
+        f.savefig(subdir + timestamp + "_" + filename1)
+        f_macro.savefig(subdir + timestamp + "_" + filename2)
+
         plt.show()
 
-    def save(self, filename):
+    def save(self,, subdir="", timestamp="", filename="model.pth"):
         classifier_state_dict = {
             "net_type": type(self.net),
             "net": self.net.state_dict(),
             "history": self.history
         }
+        
+        if timestamp == "infer": timestamp = str(datetime.now()).replace(" ", "-")[:20]
 
-        torch.save(classifier_state_dict, filename)
+        torch.save(classifier_state_dict, subdir + timestamp + "_" + filename)
     
     def load(self, filename):
         classifier_state_dict = torch.load(filename, map_location=self.device)
