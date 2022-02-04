@@ -19,9 +19,9 @@ class ShallowMLP(torch.nn.Module):
         super(ShallowMLP, self).__init__()
 
         self.flatten = torch.nn.Flatten()
-        self.linear1 = torch.nn.Linear(28*28*3, 10000)
+        self.linear1 = torch.nn.Linear(28*28*3, 1000)
         self.sigmoid1 = torch.nn.Sigmoid()
-        self.linear2 = torch.nn.Linear(10000, 20)
+        self.linear2 = torch.nn.Linear(1000, 20)
         self.softmax = torch.nn.Softmax(dim=0)
 
     def forward(self, X):

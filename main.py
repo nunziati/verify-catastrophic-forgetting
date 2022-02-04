@@ -17,7 +17,7 @@ def interactive():
 if __name__ == "__main__":
     start_time = time.time()
 
-    device = torch.device("cpu")
+    device = torch.device("cuda:0")
 
     print("Downloading datasets...")
     transform_cifar10 = transforms.Compose([transforms.Resize(28), transforms.ToTensor()])
@@ -34,8 +34,8 @@ if __name__ == "__main__":
     test_set = DatasetMerger((test_set_cifar10, test_set_mnist), set_labels_from=train_set)
     train_set.dataset_wise_sort_by_label()
 
-    train_set_loader = torch.utils.data.DataLoader(train_set, batch_size=1, shuffle=False, num_workers=2)
-    test_set_loader = torch.utils.data.DataLoader(test_set, batch_size=16, shuffle=False, num_workers=2)
+    train_set_loader = torch.utils.data.DataLoader(train_set, batch_size=2**17, shuffle=False, num_workers=4)
+    test_set_loader = torch.utils.data.DataLoader(test_set, batch_size=2**17, shuffle=False, num_workers=4)
     print("Training set correctly sorted!")
 
     print("Creating classifier...")
@@ -49,6 +49,8 @@ if __name__ == "__main__":
     classifier.train_class_by_class(train_set_loader, optimizer="sgd", lr=0.00003, weight_decay=0.3, test_data=test_set_loader)
     print("Training correctly completed!")
 
+    classifier.save("test.pth")
+    
     print("Evaluating classifier...")
     accuracy = classifier.evaluate(test_set_loader)
     print("Classifier evaluated...")
