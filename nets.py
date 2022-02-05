@@ -1,10 +1,10 @@
 import torch
 
 class MyConv2d(torch.nn.Conv2d):
-    """Custom alias for torch.nn.Conv2d, built because paddint="same" is not a valid option in some versions of pytorch.
+    """Custom version of torch.nn.Conv2d, built because paddint="same" is not a valid option in some versions of pytorch.
         There is no need of a forward method, because torch.nn.Conv2d already defines it."""
 
-    def __init__(self, in_maps, out_maps, padding="same", **kwargs):
+    def __init__(self, in_maps, out_maps, *args, padding="same", **kwargs):
         """Constructor of the class is the same as the constructor of the parent class.
         
         Args:
@@ -25,7 +25,7 @@ class MyConv2d(torch.nn.Conv2d):
                 raise ValueError("padding str must be 'same'")
 
         # use the computed padding and the other parameters to initialize the instance of torch.nn.Conv2d
-        super(MyConv2d, self).__init__(in_maps, out_maps, padding=padding, **kwargs)
+        super(MyConv2d, self).__init__(in_maps, out_maps, *args, padding=padding, **kwargs)
 
 class ShallowMLP(torch.nn.Module):
     def __init__(self):
