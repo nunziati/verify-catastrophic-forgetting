@@ -44,15 +44,15 @@ if __name__ == "__main__":
     print("Starting the training procedure...")
     classifier.train_class_by_class(train_set_loader,
                                     optimizer="sgd",
-                                    lr=0.00003,
-                                    weight_decay=0.3,
+                                    lr=0.01,
+                                    weight_decay=0,
                                     test_data=test_set_loader,
                                     plot=True,
                                     subdir="./figures/",
                                     timestamp=timestamp)
     print("Training correctly completed!")
 
-    classifier.save(subdir="./models/", timestamp=timestamp)
+    # classifier.save(subdir="./models/", timestamp=timestamp)
 
     print("Evaluating classifier...")
     accuracy = classifier.evaluate(test_set_loader)

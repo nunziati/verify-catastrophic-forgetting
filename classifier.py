@@ -41,11 +41,13 @@ class Classifier:
 
             for img, label in zip(img_mini_batch, label_mini_batch):
                 if test_data is not None and label.item() != current_label:
+                    old_label = current_label
                     self.history[current_label] = self.evaluate_class_by_class(test_data)
                     current_label = label.item()
+                    print("Old: {}; current: {}".format(old_label, current_label))
                 _, logits = self.net(img.view((1, *img.shape)))
                 loss = loss_function(logits, label.view((1,)))
-                if i % 100 == 0: print(i, "\t", loss)
+                # if i % 100 == 0: print(i, "\t", loss)
                 i += 1
 
                 loss.backward()
@@ -65,7 +67,6 @@ class Classifier:
         classes = sorted(list(data.dataset.class_map.values()))
         n_classes = len(classes)
         
-        eye = torch.eye(n_classes)
         true_positive = torch.zeros((n_classes,)).to(self.device)
         total = torch.zeros((n_classes,)).to(self.device)
 
@@ -111,7 +112,7 @@ class Classifier:
         if subplot == "class":
             for index, h in enumerate(self.history):
                 ax = f.add_subplot(4, 5, index+1)
-                ax.bar(range(1, 21), h)
+                ax.bar(range(20), h)
                 ax.set_ylim([0, 1])
                 ax.set_title("class {}".format(index))
                 ax.set_xlabel("time (after epoch #)")
