@@ -7,6 +7,7 @@ import nets
 class Classifier:
     """Classifier that contains the model and makes predictions."""
 
+    # types of networks that is possible to manage
     net_types = {
         "shallow_mlp": nets.ShallowMLP,
         "deep_mlp": nets.DeepMLP,
@@ -15,29 +16,49 @@ class Classifier:
     }
 
     def __init__(self, net="shallow_mlp", device="cpu"):
-        """Create a classifier filling it with an existing model.
+        """Create a classifier with a specified neural model.
 
         Args:
-            net: the string ("resnet" or "simplecnn") that indicates which backbone network will be used.
-            device: the string ("cpu", "cuda:0", "cuda:1", ...) that indicates the device to use.
+            net: a string that should be in net_types, encoding the type of network to use.
+            device: the string ("cpu", "cuda:0", "cuda:1", ...) that indicates the device to use (can also be torch.device object).
         """
         
+        # initialize attributes: device and neural network
         self.device = torch.device(device)
         self.net_type = net_types[net]
         self.net = self.net_type().to(self.device)
+
+        # will contain the history of the evaluation during the class-by-class training procedure
         self.history = None
 
     def initialize_net(self):
+        """Initialization of the network, using its internal initialization method."""
+
         self.net.initialize()
 
     def train_class_by_class(self, data, test_data=None, optimizer="adam", lr=0.01, weight_decay=0, plot=True, **kwargs):
+        """Train the network using the specified options.
+        The training is single-pass, and the evaluation is performed at the end of each class.
+
+        Args:
+            data: a dataset or dataloader containg the training data in the form (image, label)
+            test_data: a dataset or dataloader (as the previous one) containing the test data
+            optimizer: "adam" or "sgd"
+            lr: learning rate
+            weight_decay: weight multiplying the weight decay regularizaion term
+            plot: if True, the history is plotted at the end of the training procedure
+        """
+
+        # save the train/eval mode of the network and change it to training mode
         training = self.net.training
         self.net.train()
 
         n_classes = data.dataset.num_classes
 
+        # use cross-entropy loss function
         loss_function = torch.nn.CrossEntropyLoss()
 
+        # create the optimizer selected by the caller of the function
         if optimizer == "sgd":
             opt = torch.optim.SGD(self.net.parameters(), lr, weight_decay=weight_decay)
         elif optimizer == "adam":
@@ -45,37 +66,58 @@ class Classifier:
         else:
             raise ValueError('Optimizer "{}" not defined.'.format(optimizer))
 
-        current_label = 0 # better way to have this?
+        # select the initial label, assuming it to be 0
+        current_label = 0
+
+        # initializing the torch tensor that will contain the history of the evaluation during training
         self.history = torch.empty((n_classes, n_classes), dtype=torch.float32)
 
+        #initilize a counter for the processed training examples
         i = 0
 
+        # loop on the mini-batches
         for img_mini_batch, label_mini_batch in data:
+            # send the mini-batch to the device memory
             img_mini_batch = img_mini_batch.to(self.device)
             label_mini_batch = label_mini_batch.to(self.device)
 
+            # loop over the examples of the current mini-batch
             for img, label in zip(img_mini_batch, label_mini_batch):
+                # if we passed to another class, evalute the model on the whole test set and save the results
                 if test_data is not None and label.item() != current_label:
-                    old_label = current_label
                     self.history[current_label] = self.evaluate_class_by_class(test_data)
-                    current_label = label.item()
-                    print("Old: {}; current: {}".format(old_label, current_label))
+
+                # forward step
+                # compute the output (actually the logist) of the model on the current example
                 _, logits = self.net(img.view((1, *img.shape)))
+
+                # compute the loss function
                 loss = loss_function(logits, label.view((1,)))
-                # if i % 100 == 0: print(i, "\t", loss)
+
+                # print the loss function, once every 100 epochs
+                if i % 100 == 0: print(i, "\t", loss)
                 i += 1
 
+                # perform the backward step and the optimization step
                 loss.backward()
                 opt.step()
                 opt.zero_grad()
 
+        # evaluate the model after the examples of the last class have been provided
         self.history[current_label] = self.evaluate_class_by_class(test_data)
 
-        if plot: self.plot(**kwargs)       
+        # plot the results, if needed
+        if plot: self.plot(**kwargs)     
 
+        # recover the initial train/eval mode
         if not training: self.net.eval()
 
     def evaluate_class_by_class(self, data):
+        """Compute and retrn the accuracy of the classifier on each single class.
+        
+        Args:
+            
+        """
         training = self.net.training
         self.net.eval()
 
