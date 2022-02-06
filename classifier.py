@@ -2,15 +2,30 @@ import torch
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from datetime import datetime
+import nets
 
 class Classifier:
-    def __init__(self, net, device="cpu"):
-        self.net = net
+    """Classifier that contains the model and makes predictions."""
 
+    net_types = {
+        "shallow_mlp": nets.ShallowMLP,
+        "deep_mlp": nets.DeepMLP,
+        "shallow_cnn": nets.ShallowCNN,
+        "deep_cnn": nets.DeepCNN
+    }
+
+    def __init__(self, net="shallow_mlp", device="cpu"):
+        """Create a classifier filling it with an existing model.
+
+        Args:
+            net: the string ("resnet" or "simplecnn") that indicates which backbone network will be used.
+            device: the string ("cpu", "cuda:0", "cuda:1", ...) that indicates the device to use.
+        """
+        
         self.device = torch.device(device)
+        self.net_type = net_types[net]
+        self.net = self.net_type().to(self.device)
         self.history = None
-
-        self.net.to(self.device)
 
     def initialize_net(self):
         self.net.initialize()
@@ -154,16 +169,17 @@ class Classifier:
     
     def load(self, filename):
         classifier_state_dict = torch.load(filename, map_location=self.device)
-        self.net = classifier_state_dict["net_type"]()
+        self.net_type = classifier_state_dict["net_type"]
+        self.net = net_types[self.net_type]()
         self.net.load_state_dict(classifier_state_dict["net"])
         self.history = classifier_state_dict["history"]
 
-    @staticmethod
-    def load_from_file(filename, device="cpu"):
+    @classmethod
+    def from_file(cls, filename, device="cpu"):
         device = torch.device(device)
         classifier_state_dict = torch.load(filename, map_location=device)
-        net = classifier_state_dict["net_type"]()
-        classifier = Classifier(net, device)
+        net = net_types[classifier_state_dict["net_type"]]
+        classifier = cls(net, device)
         classifier.net.load_state_dict(classifier_state_dict["net"])
         classifier.history = classifier_state_dict["history"]
 

@@ -8,6 +8,6 @@ from nets import *
 from classifier import *
 import time
 
-classifier = Classifier.load_from_file("test.pth")
+classifier = Classifier.from_file("test.pth")
 
 classifier.plot()

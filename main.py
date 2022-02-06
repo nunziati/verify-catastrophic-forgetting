@@ -44,8 +44,7 @@ if __name__ == "__main__":
     print("Dataloaders are ready.\n")
 
     print("Creating classifier...")
-    net = ShallowMLP().to(torch.float32)
-    classifier = Classifier(net, device)
+    classifier = Classifier("shallow_mlp", device)
     print("Classifier correctly created!")
 
     print("Training the classifier...")
