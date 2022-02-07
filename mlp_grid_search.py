@@ -12,6 +12,7 @@ import sys
 
 if __name__ == "__main__":
     filename = sys.argv[1]
+    from_n = sys.argv[2]
 
     # selecting the device here will change it in the whole program
     device = torch.device("cuda:0")
@@ -65,6 +66,8 @@ if __name__ == "__main__":
     ]
 
     for index, (x, y, z, u, v, w) in enumerate(grid_search_params):
+        if index < from_n: continue
+        
         print("Experiment number: ", index)
         print("Parameters:")
         print("\tNetwork type: ", x)
