@@ -41,12 +41,12 @@ class Classifier:
         The training is single-pass, and the evaluation is performed at the end of each class.
 
         Args:
-            data: a dataset or dataloader containg the training data in the form (image, label)
-            test_data: a dataset or dataloader (as the previous one) containing the test data
-            optimizer: "adam" or "sgd"
-            lr: learning rate
-            weight_decay: weight multiplying the weight decay regularizaion term
-            plot: if True, the history is plotted at the end of the training procedure
+            data: a dataset or dataloader containg the training data in the form (image, label).
+            test_data: a dataset or dataloader (as the previous one) containing the test data.
+            optimizer: "adam" or "sgd".
+            lr: learning rate.
+            weight_decay: weight multiplying the weight decay regularizaion term.
+            plot: if True, the history is plotted at the end of the training procedure.
         """
 
         # save the train/eval mode of the network and change it to training mode
@@ -75,7 +75,7 @@ class Classifier:
         #initilize a counter for the processed training examples
         i = 0
 
-        # loop on the mini-batches
+        # loop over the mini-batches
         for img_mini_batch, label_mini_batch in data:
             # send the mini-batch to the device memory
             img_mini_batch = img_mini_batch.to(self.device)
@@ -116,63 +116,108 @@ class Classifier:
         """Compute and retrn the accuracy of the classifier on each single class.
         
         Args:
-            
+            data: the data set to be used as test set.
+
+        Returns: a torch.Tensor containg the accuracy on each class.
         """
+        
+        # save the train/eval mode of the network and change it to evaluation mode
         training = self.net.training
         self.net.eval()
 
+        # get the targets and the number of classes
         classes = sorted(list(data.dataset.class_map.values()))
         n_classes = len(classes)
         
+        # initializing the counters for the class-by-class accuracy
         true_positive = torch.zeros((n_classes,)).to(self.device)
         total = torch.zeros((n_classes,)).to(self.device)
 
+        # loop over the mini-batches
         for img, label in data:
+            # send the mini-batch to the device memory
             img = img.to(self.device)
             label = label.to(self.device)
+
+            # compute the output of the model on the current mini-batch
             output, _ = self.net(img)
+
+            # decision rule
             output_label = torch.argmax(output, dim=-1).to(self.device)
 
+            # update the counters
             for class_index, c in enumerate(classes):
                 true_positive[class_index] += torch.sum(torch.logical_and(label==c, output_label==c))
                 total[class_index] += torch.sum(label==c)
 
+        # recover the initial train/eval mode
         if training: self.net.train()
 
+        # return the 1D tensor of accuracies of each class
         return true_positive / total
 
     def evaluate(self, data):
+        """Compute and retrn the overall accuracy of the classifier on the whole test set.
+        
+        Args:
+            data: the data set to be used as test set.
+
+        Returns: the accuracy on the whole test set.
+        """
+
+        # save the train/eval mode of the network and change it to evaluation mode
         training = self.net.training
         self.net.eval()
 
+        # initializing the counters for the correctly classified examples
         correct = 0
 
+        # loop over the mini-batches
         for img, label in data:
+            # send the mini-batch to the device memory
             img = img.to(self.device)
             label = label.to(self.device)
+
+            # compute the output of the model on the current mini-batch
             output, _ = self.net(img)
+
+            # decision rule
             output_label = torch.argmax(output, dim=-1)
+            
+            # update the counters
             correct += torch.sum(torch.eq(label, output_label))
 
+        # recover the initial train/eval mode
         if training: self.net.train()
 
+        # return the accuracy
         return correct / len(data.dataset)
 
-    def plot(self, subplot="class", subdir="", timestamp="", filename1="accuracy_class_by_cass.jpg", filename2="accuracy.jpg"):
+    def plot(self, subplot="class", save=False, subdir="", timestamp="", filename1="accuracy_class_by_cass.jpg", filename2="accuracy.jpg"):
+        """Plotting the results: class-by-class accuracy after each class; overall accuracy after each class.
+
+        Args:
+            subplot: if "class", each subplot will represent the accuracy OF a class class; if "time", each subplot is the accuracy AFTER a class.
+            salve: if True, the plots will also be saved.
+            subdir, timestamp, filename1, filename2: they are useful to decide the path and name of the files to be saved.
+        """
+
         if self.history is None:
             raise Exception("Before plotting, you should train the classifier providing test data.")
 
+        # computing the overall accuracy over time
         macro_accuracy = self.history.mean(dim=1)
-
-        f = plt.figure(figsize=(15, 12), dpi=300)
         
+        f = plt.figure(figsize=(15, 12), dpi=300)
+
+        # looping over the rows/columns of the history of evaluation computed during training, and plotting them on different subplots
         if subplot == "class":
             for index, h in enumerate(self.history):
                 ax = f.add_subplot(4, 5, index+1)
                 ax.bar(range(20), h)
                 ax.set_ylim([0, 1])
                 ax.set_title("class {}".format(index))
-                ax.set_xlabel("time (after epoch #)")
+                ax.set_xlabel("computed after class #")
                 ax.set_ylabel("accuracy")
         elif subplot == "time":
             for index, h in enumerate(self.history.transpose(0, 1)):
@@ -184,45 +229,85 @@ class Classifier:
                 ax.set_ylabel("accuracy")
         else: raise ValueError("The parameter subplot must be in {'class', 'time'}.")
         
+        # add spacing between subplots
         f.tight_layout(pad=3.0)
 
+        # plotting the macro accuracy of the classifier over time
         f_macro = plt.figure()
         ax = f_macro.add_subplot(111)
         ax.bar(torch.arange(0, 20), macro_accuracy)
         ax.set_ylim([0, 1])
 
+        # saving the plots as figures, using the name provided by the user or using a predefined one
         if timestamp == "infer": timestamp = str(datetime.now()).replace(" ", "-")[:20]
 
         f.savefig(subdir + timestamp + "_" + filename1)
         f_macro.savefig(subdir + timestamp + "_" + filename2)
 
+        # show the plots
         plt.show()
 
     def save(self, subdir="", timestamp="", filename="model.pth"):
+        """Saving the classifier state as a .pth file.
+        
+        Args:
+            subdir, timestamp, filename: they are useful to decide the path and name of the file to be saved.
+        """
+        # saving the state of the classifier, with all the information to re-build it
         classifier_state_dict = {
-            "net_type": type(self.net),
+            "net_type": self.net_type,
             "net": self.net.state_dict(),
             "history": self.history
         }
         
+        # saving the classifier, using the name provided by the user or using a predefined one
         if timestamp == "infer": timestamp = str(datetime.now()).replace(" ", "-")[:20]
 
         torch.save(classifier_state_dict, subdir + timestamp + "_" + filename)
     
     def load(self, filename):
+        """Load a previously saved classifier and use it to fill the state of this classifier.
+
+        Args:
+            filename: the .pth file containing the state of the classifier to be loaded.
+        """
+
+        # load the file
         classifier_state_dict = torch.load(filename, map_location=self.device)
-        self.net_type = classifier_state_dict["net_type"]
-        self.net = net_types[self.net_type]()
+        
+        # check the content of the file
+        if self.net_type != classifier_state_dict["net_type"]:
+            raise Exception("The classifier in the file is using a different model.")
+        
+        # if the model is of the correct type, replace the state of the internal classifier
         self.net.load_state_dict(classifier_state_dict["net"])
         self.history = classifier_state_dict["history"]
 
     @classmethod
     def from_file(cls, filename, device="cpu"):
+        """Create a new classifier, loading the state from an external file.
+        
+        Args:
+            filename: the file to be used to load the classifier.
+            device: the device on which to build the classifier.
+
+        Returns: an instance of the classifier, build from the file.
+        """
+
         device = torch.device(device)
+
+        # load the file
         classifier_state_dict = torch.load(filename, map_location=device)
-        net = net_types[classifier_state_dict["net_type"]]
-        classifier = cls(net, device)
+        
+        # retrieve the type of classifier to build
+        net_type = net_types[classifier_state_dict["net_type"]]
+
+        # create an instance of the classifier, using the correct net_type and device
+        classifier = cls(net_type, device)
+
+        # fill the classifier with the state contained in the source file
         classifier.net.load_state_dict(classifier_state_dict["net"])
         classifier.history = classifier_state_dict["history"]
 
+        # return the classifier
         return classifier
