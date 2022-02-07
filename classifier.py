@@ -15,7 +15,7 @@ class Classifier:
         "deep_cnn": nets.DeepCNN
     }
 
-    def __init__(self, net="shallow_mlp", device="cpu"):
+    def __init__(self, net="shallow_mlp", device="cpu", **kwargs):
         """Create a classifier with a specified neural model.
 
         Args:
@@ -26,7 +26,7 @@ class Classifier:
         # initialize attributes: device and neural network
         self.device = torch.device(device)
         self.net_type = net_types[net]
-        self.net = self.net_type().to(self.device)
+        self.net = self.net_type(**kwargs).to(self.device)
 
         # will contain the history of the evaluation during the class-by-class training procedure
         self.history = None
@@ -256,6 +256,7 @@ class Classifier:
         # saving the state of the classifier, with all the information to re-build it
         classifier_state_dict = {
             "net_type": self.net_type,
+            "net_parameters": self.net_parameters,
             "net": self.net.state_dict(),
             "history": self.history
         }
@@ -276,7 +277,7 @@ class Classifier:
         classifier_state_dict = torch.load(filename, map_location=self.device)
         
         # check the content of the file
-        if self.net_type != classifier_state_dict["net_type"]:
+        if self.net_type != classifier_state_dict["net_type"] or self.net_parameters != classifier_state_dict["net_parameters"]:
             raise Exception("The classifier in the file is using a different model.")
         
         # if the model is of the correct type, replace the state of the internal classifier
@@ -301,9 +302,10 @@ class Classifier:
         
         # retrieve the type of classifier to build
         net_type = net_types[classifier_state_dict["net_type"]]
+        net_parameters = classifier_state_dict["net_parameters"]
 
         # create an instance of the classifier, using the correct net_type and device
-        classifier = cls(net_type, device)
+        classifier = cls(net_type, device, **net_parameters)
 
         # fill the classifier with the state contained in the source file
         classifier.net.load_state_dict(classifier_state_dict["net"])

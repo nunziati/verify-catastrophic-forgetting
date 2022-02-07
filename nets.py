@@ -28,14 +28,16 @@ class MyConv2d(torch.nn.Conv2d):
         super(MyConv2d, self).__init__(in_maps, out_maps, *args, padding=padding, **kwargs)
 
 class ShallowMLP(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, hidden_units=100, dropout=0):
         super(ShallowMLP, self).__init__()
 
+        self.net_parameters = {"hidden_units": hidden_units}
+
         self.flatten = torch.nn.Flatten()
-        self.linear1 = torch.nn.Linear(28*28*3, 1000)
-        self.activation1 = torch.nn.ReLU()
-        self.dropout1 = torch.nn.Dropout(p=0.8)
-        self.linear2 = torch.nn.Linear(1000, 20)
+        self.linear1 = torch.nn.Linear(28*28*3, self.hidden_units)
+        self.activation1 = torch.nn.Sigmoid()
+        self.dropout1 = torch.nn.Dropout(dropout)
+        self.linear2 = torch.nn.Linear(self.hidden_units, 20)
         self.softmax = torch.nn.Softmax(dim=0)
 
     def forward(self, X):
@@ -53,52 +55,60 @@ class ShallowMLP(torch.nn.Module):
             torch.nn.init.normal_(param)
 
 class DeepMLP(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, hidden_units=100, dropout=0):
         super(DeepMLP, self).__init__()
 
+        self.net_parameters = {"hidden_units": hidden_units}
+
         self.flatten = torch.nn.Flatten()
-        self.linear1 = torch.nn.Linear(28*28*3, 100)
+        self.linear1 = torch.nn.Linear(28*28*3, self.hidden_units)
         self.activation1 = torch.nn.Sigmoid()
-        self.linear2 = torch.nn.Linear(100, 100)
+        self.dropout1 = torch.nn.Dropout(dropout)
+        self.linear2 = torch.nn.Linear(self.hidden_units, self.hidden_units)
         self.activation2 = torch.nn.Sigmoid()
-        self.linear3 = torch.nn.Linear(100, 100)
+        self.dropout1 = torch.nn.Dropout(dropout)
+        self.linear3 = torch.nn.Linear(self.hidden_units, self.hidden_units)
         self.activation3 = torch.nn.Sigmoid()
-        self.linear4 = torch.nn.Linear(100, 100)
+        self.dropout1 = torch.nn.Dropout(dropout)
+        self.linear4 = torch.nn.Linear(self.hidden_units, self.hidden_units)
         self.activation4 = torch.nn.Sigmoid()
-        self.linear5 = torch.nn.Linear(100, 100)
+        self.dropout1 = torch.nn.Dropout(dropout)
+        self.linear5 = torch.nn.Linear(self.hidden_units, self.hidden_units)
         self.activation5 = torch.nn.Sigmoid()
-        self.linear6 = torch.nn.Linear(100, 100)
+        self.dropout1 = torch.nn.Dropout(dropout)
+        self.linear6 = torch.nn.Linear(self.hidden_units, self.hidden_units)
         self.activation6 = torch.nn.Sigmoid()
-        self.linear7 = torch.nn.Linear(100, 100)
+        self.dropout1 = torch.nn.Dropout(dropout)
+        self.linear7 = torch.nn.Linear(self.hidden_units, self.hidden_units)
         self.activation7 = torch.nn.Sigmoid()
-        self.linear8 = torch.nn.Linear(100, 100)
-        self.activation8 = torch.nn.Sigmoid()
-        self.linear9 = torch.nn.Linear(100, 100)
-        self.activation9 = torch.nn.Sigmoid()
-        self.linear10 = torch.nn.Linear(100, 20)
+        self.dropout1 = torch.nn.Dropout(dropout)
+        self.linear8 = torch.nn.Linear(self.hidden_units, 20)
         self.softmax = torch.nn.Softmax()
 
     def forward(self, X):
         O = self.flatten(X)
         O = self.linear1(O)
         O = self.activation1(O)
+        O = self.dropout1(O)
         O = self.linear2(O)
         O = self.activation2(O)
+        O = self.dropout1(O)
         O = self.linear3(O)
         O = self.activation3(O)
+        O = self.dropout1(O)
         O = self.linear4(O)
         O = self.activation4(O)
+        O = self.dropout1(O)
         O = self.linear5(O)
         O = self.activation5(O)
+        O = self.dropout1(O)
         O = self.linear6(O)
         O = self.activation6(O)
+        O = self.dropout1(O)
         O = self.linear7(O)
         O = self.activation7(O)
-        O = self.linear8(O)
-        O = self.activation8(O)
-        O = self.linear9(O)
-        O = self.activation9(O)
-        A = self.linear10(O)
+        O = self.dropout1(O)
+        A = self.linear8(O)
         O = self.softmax(A)
 
         return O, A
