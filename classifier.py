@@ -104,7 +104,8 @@ class Classifier:
                 opt.zero_grad()
 
         # evaluate the model after the examples of the last class have been provided
-        self.history[current_label] = self.evaluate_class_by_class(test_data)
+        if test_data is not None:
+            self.history[current_label] = self.evaluate_class_by_class(test_data)
 
         # plot the results, if needed
         if plot: self.plot(**kwargs)     

@@ -70,14 +70,14 @@ if __name__ == "__main__":
         if index < start_experiment: continue
         if index >= end_experiment: break
 
-        print("Experiment number: ", index)
+        print("Experiment number:", index)
         print("Parameters:")
-        print("\tNetwork type: ", x)
-        print("\tNumber of hidden units: ", y)
-        print("\tOptimizer: ", z)
-        print("\tRegularization parameter: ", u)
+        print("\tNetwork type:", x)
+        print("\tNumber of hidden units:", y)
+        print("\tOptimizer:", z)
+        print("\tRegularization parameter:", u)
         print("\tDropout probability:", v)
-        print("\tLearning rate: ", w)
+        print("\tLearning rate:", w)
 
         classifier = Classifier(x, device, hidden_units=y, dropout=v)
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
         accuracy = classifier.evaluate(test_set_loader)
 
         with open(filename, "a+") as f:
-            f.write(",".join((x, y, z, u, v, w)) + "\n")
+            f.write(",".join([str(value) for value in (x, y, z, u, v, w, accuracy)]) + "\n")
 
         del classifier
         del accuracy

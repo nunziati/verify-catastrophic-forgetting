@@ -4,6 +4,7 @@ project_proposal.txt
 figures/
 models/
 *.pth
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
