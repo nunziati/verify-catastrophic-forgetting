@@ -25,7 +25,7 @@ class Classifier:
         
         # initialize attributes: device and neural network
         self.device = torch.device(device)
-        self.net_type = net_types[net]
+        self.net_type = Classifier.net_types[net]
         self.net = self.net_type(**kwargs).to(self.device)
 
         # will contain the history of the evaluation during the class-by-class training procedure
@@ -301,7 +301,7 @@ class Classifier:
         classifier_state_dict = torch.load(filename, map_location=device)
         
         # retrieve the type of classifier to build
-        net_type = net_types[classifier_state_dict["net_type"]]
+        net_type = Classifier.net_types[classifier_state_dict["net_type"]]
         net_parameters = classifier_state_dict["net_parameters"]
 
         # create an instance of the classifier, using the correct net_type and device

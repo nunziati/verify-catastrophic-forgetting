@@ -12,8 +12,8 @@ import sys
 
 if __name__ == "__main__":
     filename = sys.argv[1]
-    start_experiment = sys.argv[2]
-    end_experiment = sys.argv[3]
+    start_experiment = int(sys.argv[2])
+    end_experiment = int(sys.argv[3])
 
     # selecting the device here will change it in the whole program
     device = torch.device("cuda:0")

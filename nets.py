@@ -34,10 +34,10 @@ class ShallowMLP(torch.nn.Module):
         self.net_parameters = {"hidden_units": hidden_units}
 
         self.flatten = torch.nn.Flatten()
-        self.linear1 = torch.nn.Linear(28*28*3, self.hidden_units)
+        self.linear1 = torch.nn.Linear(28*28*3, self.net_parameters["hidden_units"])
         self.activation1 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear2 = torch.nn.Linear(self.hidden_units, 20)
+        self.linear2 = torch.nn.Linear(self.net_parameters["hidden_units"], 20)
         self.softmax = torch.nn.Softmax(dim=0)
 
     def forward(self, X):
@@ -61,28 +61,28 @@ class DeepMLP(torch.nn.Module):
         self.net_parameters = {"hidden_units": hidden_units}
 
         self.flatten = torch.nn.Flatten()
-        self.linear1 = torch.nn.Linear(28*28*3, self.hidden_units)
+        self.linear1 = torch.nn.Linear(28*28*3, self.net_parameters["hidden_units"])
         self.activation1 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear2 = torch.nn.Linear(self.hidden_units, self.hidden_units)
+        self.linear2 = torch.nn.Linear(self.net_parameters["hidden_units"], self.net_parameters["hidden_units"])
         self.activation2 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear3 = torch.nn.Linear(self.hidden_units, self.hidden_units)
+        self.linear3 = torch.nn.Linear(self.net_parameters["hidden_units"], self.net_parameters["hidden_units"])
         self.activation3 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear4 = torch.nn.Linear(self.hidden_units, self.hidden_units)
+        self.linear4 = torch.nn.Linear(self.net_parameters["hidden_units"], self.net_parameters["hidden_units"])
         self.activation4 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear5 = torch.nn.Linear(self.hidden_units, self.hidden_units)
+        self.linear5 = torch.nn.Linear(self.net_parameters["hidden_units"], self.net_parameters["hidden_units"])
         self.activation5 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear6 = torch.nn.Linear(self.hidden_units, self.hidden_units)
+        self.linear6 = torch.nn.Linear(self.net_parameters["hidden_units"], self.net_parameters["hidden_units"])
         self.activation6 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear7 = torch.nn.Linear(self.hidden_units, self.hidden_units)
+        self.linear7 = torch.nn.Linear(self.net_parameters["hidden_units"], self.net_parameters["hidden_units"])
         self.activation7 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear8 = torch.nn.Linear(self.hidden_units, 20)
+        self.linear8 = torch.nn.Linear(self.net_parameters["hidden_units"], 20)
         self.softmax = torch.nn.Softmax()
 
     def forward(self, X):
