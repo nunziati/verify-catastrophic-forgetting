@@ -16,7 +16,7 @@ if __name__ == "__main__":
     end_experiment = int(sys.argv[3])
 
     # selecting the device here will change it in the whole program
-    device = torch.device("cuda:1")
+    device = torch.device("cuda:0")
 
     print("Downloading and preparing single datasets...")
     # for the cifar10 dataset, the pictures are resized to the size of the pictures in the mnist dataset
@@ -49,37 +49,31 @@ if __name__ == "__main__":
     test_set_loader = torch.utils.data.DataLoader(test_set, batch_size=2**10, shuffle=False, num_workers=4)
     print("Dataloaders are ready.\n")
 
-    mlp_list = ["shallow_mlp", "deep_mlp"]
-    mlp_hidden_units = [10, 100, 1000, 10000]
+    cnn_list = ["shallow_cnn", "deep_cnn"]
     optimizer = ["sgd", "adam"]
-    weight_decay_list = [0, 3e-2, 3e-1, 1, 3, 10]
-    dropout_list = [0, 0.5, 0.8]
-    lr_list = [1e-7, 1e-5, 1e-3, 1e-1]
+    weight_decay_list = [0, 3e-2, 1e-1, 3e-1, 1, 3, 10]
+    lr_list = [1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
 
     # creating the combinatios of parameters for grid serach
-    grid_search_params = [(x, y, z, u, v, w)
-        for x in mlp_list
-        for y in mlp_hidden_units
+    grid_search_params = [(x, z, u, w)
+        for x in cnn_list
         for z in optimizer
         for u in weight_decay_list
-        for v in dropout_list
         for w in lr_list
     ]
 
-    for index, (x, y, z, u, v, w) in enumerate(grid_search_params):
+    for index, (x, z, u, w) in enumerate(grid_search_params):
         if index < start_experiment: continue
         if index >= end_experiment: break
 
         print("Experiment number:", index)
         print("Parameters:")
         print("\tNetwork type:", x)
-        print("\tNumber of hidden units:", y)
         print("\tOptimizer:", z)
         print("\tRegularization parameter:", u)
-        print("\tDropout probability:", v)
         print("\tLearning rate:", w)
 
-        classifier = Classifier(x, device, hidden_units=y, dropout=v)
+        classifier = Classifier(x, device)
 
         classifier.train_class_by_class(train_set_loader,
             optimizer=z,
@@ -90,7 +84,7 @@ if __name__ == "__main__":
         accuracy = classifier.evaluate(test_set_loader)
 
         with open(filename, "a+") as f:
-            f.write(",".join([str(value) for value in (x, y, z, u, v, w, accuracy)]) + "\n")
+            f.write(",".join([str(value) for value in (x, z, u, w, accuracy)]) + "\n")
 
         del classifier
         del accuracy

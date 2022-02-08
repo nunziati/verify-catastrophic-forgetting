@@ -17,7 +17,7 @@ if __name__ == "__main__":
     timestamp = str(datetime.now()).replace(" ", "-")[:20]
 
     # selecting the device here will change it in the whole program
-    device = torch.device("cuda:0")
+    device = torch.device("cpu")
 
     print("Downloading and preparing single datasets...")
     # for the cifar10 dataset, the pictures are resized to the size of the pictures in the mnist dataset
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     print("Creating dataloaders...")
     # creating dataloaders for the training and test set
-    train_set_loader = torch.utils.data.DataLoader(train_set, batch_size=2**17, shuffle=False, num_workers=4)
+    train_set_loader = torch.utils.data.DataLoader(train_set, batch_size=2**10, shuffle=False, num_workers=4)
     test_set_loader = torch.utils.data.DataLoader(test_set, batch_size=2**10, shuffle=False, num_workers=4)
     print("Dataloaders are ready.\n")
 

@@ -28,16 +28,16 @@ class MyConv2d(torch.nn.Conv2d):
         super(MyConv2d, self).__init__(in_maps, out_maps, *args, padding=padding, **kwargs)
 
 class ShallowMLP(torch.nn.Module):
-    def __init__(self, hidden_units=100, dropout=0):
+    def __init__(self, hidden_units=100, dropout=0.0):
         super(ShallowMLP, self).__init__()
 
-        self.net_parameters = {"hidden_units": hidden_units}
+        self.net_parameters = {"hidden_units": hidden_units, "dropout": dropout}
 
         self.flatten = torch.nn.Flatten()
-        self.linear1 = torch.nn.Linear(28*28*3, self.net_parameters["hidden_units"])
+        self.linear1 = torch.nn.Linear(28*28*3, hidden_units)
         self.activation1 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear2 = torch.nn.Linear(self.net_parameters["hidden_units"], 20)
+        self.linear2 = torch.nn.Linear(hidden_units, 20)
         self.softmax = torch.nn.Softmax(dim=0)
 
     def forward(self, X):
@@ -55,34 +55,34 @@ class ShallowMLP(torch.nn.Module):
             torch.nn.init.normal_(param)
 
 class DeepMLP(torch.nn.Module):
-    def __init__(self, hidden_units=100, dropout=0):
+    def __init__(self, hidden_units=100, dropout=0.0):
         super(DeepMLP, self).__init__()
 
-        self.net_parameters = {"hidden_units": hidden_units}
+        self.net_parameters = {"hidden_units": hidden_units, "dropout": dropout}
 
         self.flatten = torch.nn.Flatten()
-        self.linear1 = torch.nn.Linear(28*28*3, self.net_parameters["hidden_units"])
+        self.linear1 = torch.nn.Linear(28*28*3, hidden_units)
         self.activation1 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear2 = torch.nn.Linear(self.net_parameters["hidden_units"], self.net_parameters["hidden_units"])
+        self.linear2 = torch.nn.Linear(hidden_units, hidden_units)
         self.activation2 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear3 = torch.nn.Linear(self.net_parameters["hidden_units"], self.net_parameters["hidden_units"])
+        self.linear3 = torch.nn.Linear(hidden_units, hidden_units)
         self.activation3 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear4 = torch.nn.Linear(self.net_parameters["hidden_units"], self.net_parameters["hidden_units"])
+        self.linear4 = torch.nn.Linear(hidden_units, hidden_units)
         self.activation4 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear5 = torch.nn.Linear(self.net_parameters["hidden_units"], self.net_parameters["hidden_units"])
+        self.linear5 = torch.nn.Linear(hidden_units, hidden_units)
         self.activation5 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear6 = torch.nn.Linear(self.net_parameters["hidden_units"], self.net_parameters["hidden_units"])
+        self.linear6 = torch.nn.Linear(hidden_units, hidden_units)
         self.activation6 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear7 = torch.nn.Linear(self.net_parameters["hidden_units"], self.net_parameters["hidden_units"])
+        self.linear7 = torch.nn.Linear(hidden_units, hidden_units)
         self.activation7 = torch.nn.Sigmoid()
         self.dropout1 = torch.nn.Dropout(dropout)
-        self.linear8 = torch.nn.Linear(self.net_parameters["hidden_units"], 20)
+        self.linear8 = torch.nn.Linear(hidden_units, 20)
         self.softmax = torch.nn.Softmax()
 
     def forward(self, X):
@@ -121,14 +121,16 @@ class ShallowCNN(torch.nn.Module):
     def __init__(self):
         super(ShallowCNN, self).__init__()
         
-        self.conv1 = MyConv2d(3, 5, kernel_size=5, padding="same")
+        self.net_parameters = {}
+
+        self.conv1 = MyConv2d(3, 10, kernel_size=5, padding="same")
         self.relu1 = torch.nn.ReLU()
         self.maxpool1 = torch.nn.MaxPool2d(kernel_size=2)
-        self.conv2 = MyConv2d(5, 10, kernel_size=3, padding="same")
+        self.conv2 = MyConv2d(10, 20, kernel_size=3, padding="same")
         self.relu2 = torch.nn.ReLU()
         self.maxpool2 = torch.nn.MaxPool2d(kernel_size=2)
         self.flatten = torch.nn.Flatten()
-        self.linear = torch.nn.Linear(7*7*10, 20)
+        self.linear = torch.nn.Linear(7*7*20, 20)
         self.softmax = torch.nn.Softmax(dim=0)
 
     def forward(self, X):
@@ -152,22 +154,24 @@ class DeepCNN(torch.nn.Module):
     def __init__(self):
         super(DeepCNN, self).__init__()
         
-        self.conv1a = MyConv2d(3, 5, kernel_size=5, padding="same")
+        self.net_parameters = {}
+
+        self.conv1a = MyConv2d(3, 10, kernel_size=5, padding="same")
         self.relu1a = torch.nn.ReLU()
-        self.conv1b = MyConv2d(5, 5, kernel_size=5, padding="same")
+        self.conv1b = MyConv2d(10, 10, kernel_size=5, padding="same")
         self.relu1b = torch.nn.ReLU()
-        self.conv1c = MyConv2d(5, 5, kernel_size=5, padding="same")
+        self.conv1c = MyConv2d(10, 10, kernel_size=5, padding="same")
         self.relu1c = torch.nn.ReLU()
         self.maxpool1 = torch.nn.MaxPool2d(kernel_size=2)
-        self.conv2a = MyConv2d(5, 10, kernel_size=3, padding="same")
+        self.conv2a = MyConv2d(10, 20, kernel_size=3, padding="same")
         self.relu2a = torch.nn.ReLU()
-        self.conv2b = MyConv2d(10, 10, kernel_size=3, padding="same")
+        self.conv2b = MyConv2d(20, 20, kernel_size=3, padding="same")
         self.relu2b = torch.nn.ReLU()
-        self.conv2c = MyConv2d(10, 10, kernel_size=3, padding="same")
+        self.conv2c = MyConv2d(20, 20, kernel_size=3, padding="same")
         self.relu2c = torch.nn.ReLU()
         self.maxpool2 = torch.nn.MaxPool2d(kernel_size=2)
         self.flatten = torch.nn.Flatten()
-        self.linear = torch.nn.Linear(7*7*10, 20)
+        self.linear = torch.nn.Linear(7*7*20, 20)
         self.softmax = torch.nn.Softmax(dim=0)
 
     def forward(self, X):
