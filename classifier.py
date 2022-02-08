@@ -96,7 +96,7 @@ class Classifier:
                 loss = loss_function(logits, label.view((1,)))
 
                 # print the loss function, once every 100 epochs
-                if i % 100 == 0: print(i, "\t", loss)
+                if i % 100 == 0: print("Training example = {:<7}\t\t\tLoss = {:<.4f}".format(i, loss.item()))
                 i += 1
 
                 # perform the backward step and the optimization step
@@ -197,13 +197,15 @@ class Classifier:
         # return the accuracy
         return correct / len(data.dataset)
 
-    def plot(self, subplot="class", plot=False, savefig=False, subdir="", timestamp="", filename1="accuracy_class_by_cass.jpg", filename2="accuracy.jpg"):
+    def plot(self, subplot="class", plot=False, savefig=False, figsize=None, subdir="", timestamp="", filename1="accuracy_class_by_cass.jpg", filename2="accuracy.jpg"):
         """Plotting the results: class-by-class accuracy after each class; overall accuracy after each class.
 
         Args:
             subplot: if "class", each subplot will represent the accuracy OF a class class; if "time", each subplot is the accuracy AFTER a class.
             salve: if True, the plots will also be saved.
             subdir, timestamp, filename1, filename2: they are useful to decide the path and name of the files to be saved.
+        
+        Returns: the figures of the plots.
         """
 
         if self.history is None:
@@ -212,7 +214,11 @@ class Classifier:
         # computing the overall accuracy over time
         macro_accuracy = self.history.mean(dim=1)
         
-        f = plt.figure(figsize=(15, 12), dpi=300)
+        if figsize is None:
+            f = plt.figure()
+        else:
+            f = plt.figure(figsize=figsize)
+        
 
         # looping over the rows/columns of the history of evaluation computed during training, and plotting them on different subplots
         if subplot == "class":
@@ -220,24 +226,30 @@ class Classifier:
                 ax = f.add_subplot(4, 5, index+1)
                 ax.bar(range(20), h)
                 ax.set_ylim([0, 1])
-                ax.set_title("class {}".format(index))
-                ax.set_xlabel("computed after class #")
-                ax.set_ylabel("accuracy")
+                if figsize is not None:
+                    ax.set_title("class {}".format(index))
+                    ax.set_xlabel("computed after class #")
+                    ax.set_ylabel("accuracy")
         elif subplot == "time":
             for index, h in enumerate(self.history.transpose(0, 1)):
                 ax = f.add_subplot(4, 5, index+1)
                 ax.bar(range(1, 21), h)
                 ax.set_ylim([0, 1])
-                ax.set_title("time {}".format(index))
-                ax.set_xlabel("class #")
-                ax.set_ylabel("accuracy")
+                if figsize is not None:
+                    ax.set_title("time {}".format(index))
+                    ax.set_xlabel("class #")
+                    ax.set_ylabel("accuracy")
         else: raise ValueError("The parameter subplot must be in {'class', 'time'}.")
         
         # add spacing between subplots
-        f.tight_layout(pad=3.0)
+        if figsize is not None:
+            f.tight_layout(pad=figsize[0]/5)
 
         # plotting the macro accuracy of the classifier over time
-        f_macro = plt.figure()
+        if figsize is None:
+            f_macro = plt.figure()
+        else:
+            f_macro = plt.figure(figsize=figsize)
         ax = f_macro.add_subplot(111)
         ax.bar(torch.arange(0, 20), macro_accuracy)
         ax.set_ylim([0, 1])
@@ -253,16 +265,18 @@ class Classifier:
         if plot:
             plt.show()
 
+        return f, f_macro
+
     def forward(self, X):
         """Compute the output of the network."""
         with torch.no_grad():
-            O, A = self.net(X)
-        return O, A
+            output, logits = self.net(X)
+        return output, logits
 
     def predict(self, X):
         """Compute the output of the classifier: output of the network + decision rule."""
         with torch.no_grad():
-            O, _ = self.forward(X)
+            output, _ = self.forward(X)
             label = torch.argmax(output, dim=-1)
 
         return label

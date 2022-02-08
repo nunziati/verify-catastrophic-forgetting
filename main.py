@@ -110,10 +110,10 @@ if __name__ == "__main__":
 
     print("\nAccuracy: {:2.2f}%".format(accuracy*100))
 
-    if args["save"]
-        pring("\nSaving the classifier...")
+    if args["save"]:
+        print("\nSaving the classifier...")
         classifier.save(subdir="./models/", timestamp=timestamp)
-        pring("Classifier saved.")
+        print("Classifier saved.")
 
     # computing the execution time
     end_time = time.time()
