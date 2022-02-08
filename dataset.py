@@ -36,7 +36,7 @@ class DatasetMerger(torch.utils.data.Dataset):
             
             # extract the labels of each dataset and give them a unique id
             if set_labels_from is None:
-                self.class_map.update({(dataset_index, x.item()): x.item() + len(self.class_map) for x in torch.unique(torch.tensor(dataset.targets), sorted=True)})
+                self.class_map.update({(dataset_index, x.item()): x.item() + len(self.class_map) for x in torch.unique(torch.LongTensor(dataset.targets), sorted=True)})
         
         # concatenating the tables of each dataset
         self.data_indexes = torch.cat(data_indexes_list, dim=1).transpose(0, 1)
@@ -84,7 +84,7 @@ class DatasetMerger(torch.utils.data.Dataset):
 
             # creating the two columns for the considered dataset
             dataset_index_array = torch.full((1, length), dataset_index, dtype=torch.int64)
-            example_index_array = torch.argsort(torch.tensor(dataset.targets)).reshape((1, length))
+            example_index_array = torch.argsort(torch.LongTensor(dataset.targets)).reshape((1, length))
 
             # concatenating the two columns
             data_index_array = torch.cat((dataset_index_array, example_index_array))

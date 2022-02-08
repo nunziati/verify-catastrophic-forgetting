@@ -36,7 +36,7 @@ class Classifier:
 
         self.net.initialize()
 
-    def train_class_by_class(self, data, test_data=None, optimizer="adam", lr=0.01, weight_decay=0, plot=True, **kwargs):
+    def train_class_by_class(self, data, test_data=None, optimizer="adam", lr=0.01, weight_decay=0, plot=False, savefig=False, **kwargs):
         """Train the network using the specified options.
         The training is single-pass, and the evaluation is performed at the end of each class.
 
@@ -86,6 +86,7 @@ class Classifier:
                 # if we passed to another class, evalute the model on the whole test set and save the results
                 if test_data is not None and label.item() != current_label:
                     self.history[current_label] = self.evaluate_class_by_class(test_data)
+                    current_label = label.item()
 
                 # forward step
                 # compute the output (actually the logist) of the model on the current example
@@ -108,7 +109,7 @@ class Classifier:
             self.history[current_label] = self.evaluate_class_by_class(test_data)
 
         # plot the results, if needed
-        if plot: self.plot(**kwargs)     
+        if plot or savefig: self.plot(plot=plot, savefig=savefig, **kwargs)     
 
         # recover the initial train/eval mode
         if not training: self.net.eval()
@@ -133,23 +134,24 @@ class Classifier:
         # initializing the counters for the class-by-class accuracy
         true_positive = torch.zeros((n_classes,)).to(self.device)
         total = torch.zeros((n_classes,)).to(self.device)
+        
+        with torch.no_grad():
+            # loop over the mini-batches
+            for img, label in data:
+                # send the mini-batch to the device memory
+                img = img.to(self.device)
+                label = label.to(self.device)
 
-        # loop over the mini-batches
-        for img, label in data:
-            # send the mini-batch to the device memory
-            img = img.to(self.device)
-            label = label.to(self.device)
+                # compute the output of the model on the current mini-batch
+                output, _ = self.net(img)
 
-            # compute the output of the model on the current mini-batch
-            output, _ = self.net(img)
+                # decision rule
+                output_label = torch.argmax(output, dim=-1).to(self.device)
 
-            # decision rule
-            output_label = torch.argmax(output, dim=-1).to(self.device)
-
-            # update the counters
-            for class_index, c in enumerate(classes):
-                true_positive[class_index] += torch.sum(torch.logical_and(label==c, output_label==c))
-                total[class_index] += torch.sum(label==c)
+                # update the counters
+                for class_index, c in enumerate(classes):
+                    true_positive[class_index] += torch.sum(torch.logical_and(label==c, output_label==c))
+                    total[class_index] += torch.sum(label==c)
 
         # recover the initial train/eval mode
         if training: self.net.train()
@@ -174,19 +176,20 @@ class Classifier:
         correct = 0
 
         # loop over the mini-batches
-        for img, label in data:
-            # send the mini-batch to the device memory
-            img = img.to(self.device)
-            label = label.to(self.device)
+        with torch.no_grad():
+            for img, label in data:
+                # send the mini-batch to the device memory
+                img = img.to(self.device)
+                label = label.to(self.device)
 
-            # compute the output of the model on the current mini-batch
-            output, _ = self.net(img)
+                # compute the output of the model on the current mini-batch
+                output, _ = self.net(img)
 
-            # decision rule
-            output_label = torch.argmax(output, dim=-1)
-            
-            # update the counters
-            correct += torch.sum(torch.eq(label, output_label))
+                # decision rule
+                output_label = torch.argmax(output, dim=-1)
+                
+                # update the counters
+                correct += torch.sum(torch.eq(label, output_label))
 
         # recover the initial train/eval mode
         if training: self.net.train()
@@ -194,7 +197,7 @@ class Classifier:
         # return the accuracy
         return correct / len(data.dataset)
 
-    def plot(self, subplot="class", save=False, subdir="", timestamp="", filename1="accuracy_class_by_cass.jpg", filename2="accuracy.jpg"):
+    def plot(self, subplot="class", plot=False, savefig=False, subdir="", timestamp="", filename1="accuracy_class_by_cass.jpg", filename2="accuracy.jpg"):
         """Plotting the results: class-by-class accuracy after each class; overall accuracy after each class.
 
         Args:
@@ -240,13 +243,29 @@ class Classifier:
         ax.set_ylim([0, 1])
 
         # saving the plots as figures, using the name provided by the user or using a predefined one
-        if timestamp == "infer": timestamp = str(datetime.now()).replace(" ", "-")[:20]
-
-        f.savefig(subdir + timestamp + "_" + filename1)
-        f_macro.savefig(subdir + timestamp + "_" + filename2)
+        if savefig:
+            if timestamp == "infer": timestamp = str(datetime.now()).replace(" ", "-")[:20]
+            
+            f.savefig(subdir + timestamp + "_" + filename1)
+            f_macro.savefig(subdir + timestamp + "_" + filename2)
 
         # show the plots
-        plt.show()
+        if plot:
+            plt.show()
+
+    def forward(self, X):
+        """Compute the output of the network."""
+        with torch.no_grad():
+            O, A = self.net(X)
+        return O, A
+
+    def predict(self, X):
+        """Compute the output of the classifier: output of the network + decision rule."""
+        with torch.no_grad():
+            O, _ = self.forward(X)
+            label = torch.argmax(output, dim=-1)
+
+        return label
 
     def save(self, subdir="", timestamp="", filename="model.pth"):
         """Saving the classifier state as a .pth file.
