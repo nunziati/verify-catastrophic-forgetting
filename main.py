@@ -13,7 +13,7 @@ def parse_command_line_arguments():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--model', default="shallow_mlp", choices=["shallow_mlp", "deep_mlp", "shallow_cnn", "deep_cnn"], help="the name of the model to be used for the classifier")
     parser.add_argument('--optimizer', default="sgd", choices=["sgd", "adam"], help="the optimizer to use in the model")
-    parser.add_argument("--hidden", type=float, default=100, help="number of hidden units in the hidden layers (works only with MLP models)")
+    parser.add_argument("--hidden", type=int, default=100, help="number of hidden units in the hidden layers (works only with MLP models)")
     parser.add_argument("--weight_decay", type=float, default=0.0, help="regularization parameter (default: 0.0)")
     parser.add_argument("--dropout", type=float, default=0.0, help="dropout probability (default 0.0) (works only with MLP models)")
     parser.add_argument("--batch_size", type=int, default=64, help="mini-batch size (default: 64)")

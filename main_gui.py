@@ -69,9 +69,7 @@ def start_program(net_type="shallow_mlp", optimizer="sgd", hidden_units=100, wei
                                     weight_decay=weight_decay,
                                     test_data=test_set_loader,
                                     plot=False,
-                                    savefig=False,
-                                    subdir="./figures/",
-                                    timestamp=timestamp)
+                                    savefig=False)
     print("Training correctly completed!")
 
     print("\nEvaluating final classifier...")
@@ -91,7 +89,7 @@ def start_program(net_type="shallow_mlp", optimizer="sgd", hidden_units=100, wei
         L_return.append(classifier)
         plot = False
 
-    classifier.plot(savefig=savefig, plot=plot, figsize=(11, 8.8))
+    classifier.plot(savefig=savefig, subdir="./figures/", timestamp=timestamp, plot=plot, figsize=(11, 8.8))
 
 def draw_figure(canvas, figure):
     """Function to draw a figure in a plot inside a pysimplegui window"""

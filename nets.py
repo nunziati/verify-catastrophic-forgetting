@@ -31,7 +31,8 @@ class ShallowMLP(torch.nn.Module):
     def __init__(self, hidden_units=100, dropout=0.0):
         super(ShallowMLP, self).__init__()
 
-        self.net_parameters = {"hidden_units": hidden_units, "dropout": dropout}
+        self.register_buffer("hidden_units", torch.LongTensor([hidden_units]))
+        self.register_buffer("droput", torch.LongTensor([dropout]))
 
         self.flatten = torch.nn.Flatten()
         self.linear1 = torch.nn.Linear(28*28*3, hidden_units)
@@ -58,7 +59,8 @@ class DeepMLP(torch.nn.Module):
     def __init__(self, hidden_units=100, dropout=0.0):
         super(DeepMLP, self).__init__()
 
-        self.net_parameters = {"hidden_units": hidden_units, "dropout": dropout}
+        self.register_buffer("hidden_units", torch.LongTensor([hidden_units]))
+        self.register_buffer("droput", torch.LongTensor([dropout]))
 
         self.flatten = torch.nn.Flatten()
         self.linear1 = torch.nn.Linear(28*28*3, hidden_units)
