@@ -3,17 +3,15 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 import matplotlib as mpl
-import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from dataset import *
-from nets import *
 from classifier import *
 from datetime import datetime
 import PySimpleGUI as sg
 from layout import layout
 import threading
 
+# to plot the graphs in the window
 mpl.use("TkAgg")
 
 def start_program(net_type="shallow_mlp", optimizer="sgd", hidden_units=100, weight_decay=0.0, dropout=0.0, batch_size=64, lr=0.01, device="cpu", savefig=False, save_model=False, L_return=None):
@@ -103,10 +101,10 @@ def draw_figure(canvas, figure):
     return figure_canvas_agg
 
 if __name__ == "__main__":
-
-    # layout = [[sg.Text("Select the configuration and press START!")], [sg.Button("START")]]
+    # create the window, with the layout of the file "layout.py"
     window = sg.Window(title="Easy launcher", layout=layout, margins=(100, 50)).Finalize()
 
+    # initialization of useful variables for management of thread
     thread = None
     L_return = []
 
@@ -120,10 +118,11 @@ if __name__ == "__main__":
                 # unpack the returned plots
                 classifier = L_return[0]
                 
+                # return the figures to be plotted
                 f, f_macro = classifier.plot(figsize=(11, 8.8))
+                
                 # draw the plots
                 draw_figure(window["-CANVAS1-"].TKCanvas, f)
-                
                 draw_figure(window["-CANVAS2-"].TKCanvas, f_macro)
 
                 # update the window

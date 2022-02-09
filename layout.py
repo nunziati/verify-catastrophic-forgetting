@@ -1,5 +1,8 @@
 import PySimpleGUI as sg
 
+"""This module contains only the layout to be used to create the GUI using pysimplegui.
+It is nothing more that a set of widgets positioned in the window."""
+
 config_names_layout = [
     [sg.Text("Network type:")],
     [sg.Text("Optimizer:")],
@@ -54,7 +57,7 @@ plot_layout = [
 ]
 
 terminal_layout = [
-    [sg.Output(size=(80, 24))]
+    #[sg.Output(size=(80, 24))]
 ]
 
 layout = [
