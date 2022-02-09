@@ -130,4 +130,4 @@ It can:
 - building a model, directly from a file
 
 ### Other modules
-Other modules are present in the repository: they are for presentation of the results.
+Other modules are present in the repository: they are for presentation of the results and experimental activity.

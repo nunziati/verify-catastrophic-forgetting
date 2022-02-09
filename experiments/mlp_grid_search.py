@@ -1,17 +1,15 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
-import matplotlib as mpl
-import matplotlib.pyplot as plt
+import sys
+
+sys.path.append('..')
 from dataset import *
 from nets import *
 from classifier import *
-import time
-from datetime import datetime
-import sys
 
 if __name__ == "__main__":
-    filename = sys.argv[1]
+    output_filename = sys.argv[1]
     start_experiment = int(sys.argv[2])
     end_experiment = int(sys.argv[3])
 
@@ -89,7 +87,7 @@ if __name__ == "__main__":
 
         accuracy = classifier.evaluate(test_set_loader)
 
-        with open(filename, "a+") as f:
+        with open(output_filename, "a+") as f:
             f.write(",".join([str(value) for value in (x, y, z, u, v, w, accuracy)]) + "\n")
 
         del classifier
