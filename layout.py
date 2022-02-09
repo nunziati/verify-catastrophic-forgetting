@@ -34,7 +34,7 @@ config_elements_layout = [
     ],
     [sg.Checkbox("Save plot", default=False)],
     [sg.Checkbox("Save model", default=False)],
-    [sg.Button("START")]
+    [sg.Button("START", key="START")]
 ]
 
 config_layout = [

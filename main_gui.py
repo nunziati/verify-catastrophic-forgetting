@@ -16,13 +16,13 @@ import threading
 
 mpl.use("TkAgg")
 
-def start_program(window, net_type="shallow_mlp", optimizer="sgd", hidden_units=100, weight_decay=0.0, dropout=0.0, batch_size=64, lr=0.01, device="cpu", savefig=False, save_model=False):
+def start_program(net_type="shallow_mlp", optimizer="sgd", hidden_units=100, weight_decay=0.0, dropout=0.0, batch_size=64, lr=0.01, device="cpu", savefig=False, save_model=False, L_return=None):
     """Main function called after the selection of the arguments and that runs the main program."""
 
     # for giving a unique name to the files of the lots and models
     timestamp = str(datetime.now()).replace(" ", "-")[:20]
 
-    print("Program begin.")
+    print("Program begins.")
 
      # selecting the device here will change it in the whole program
     device = torch.device(device)
@@ -76,14 +76,6 @@ def start_program(window, net_type="shallow_mlp", optimizer="sgd", hidden_units=
                                     timestamp=timestamp)
     print("Training correctly completed!")
 
-    f, f_macro = classifier.plot(savefig=savefig, figsize=(11, 8.8))
-
-    draw_figure(window["-CANVAS1-"].TKCanvas, f)
-    draw_figure(window["-CANVAS2-"].TKCanvas, f_macro)
-
-    window.refresh()
-    window['Column'].contents_changed()
-
     print("\nEvaluating final classifier...")
     # computing the accuracy of the classifier
     accuracy = classifier.evaluate(test_set_loader)
@@ -95,9 +87,16 @@ def start_program(window, net_type="shallow_mlp", optimizer="sgd", hidden_units=
         print("\nSaving the classifier...")
         classifier.save(subdir="./models/", timestamp=timestamp)
         print("Classifier saved.")
+    
+    plot = True
+    if L_return is not None:
+        L_return.append(classifier)
+        plot = False
 
+    classifier.plot(savefig=savefig, plot=plot, figsize=(11, 8.8))
 
 def draw_figure(canvas, figure):
+    """Function to draw a figure in a plot inside a pysimplegui window"""
     figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
     figure_canvas_agg.draw()
     figure_canvas_agg.get_tk_widget().pack(side="top", fill="both", expand=1)
@@ -108,13 +107,41 @@ if __name__ == "__main__":
     # layout = [[sg.Text("Select the configuration and press START!")], [sg.Button("START")]]
     window = sg.Window(title="Easy launcher", layout=layout, margins=(100, 50)).Finalize()
 
+    thread = None
+    L_return = []
+
     while True:
         # wait for an event and collect the values of the inputs
-        event, values = window.read()
+        event, values = window.read(timeout=100)
+
+        # when the thread of the computation terminated
+        if thread is not None:
+            if not thread.is_alive():
+                # unpack the returned plots
+                classifier = L_return[0]
+                
+                f, f_macro = classifier.plot(figsize=(11, 8.8))
+                # draw the plots
+                draw_figure(window["-CANVAS1-"].TKCanvas, f)
+                
+                draw_figure(window["-CANVAS2-"].TKCanvas, f_macro)
+
+                # update the window
+                window.refresh()
+                window['Column'].contents_changed()
+
+                # reset the initial conditions
+                thread = None
+                L_return = []
+                
+                # enable button
+                window["START"].update(disabled=False)
 
         # presses the START button
         if event == "START":
-            
+            # disable button
+            window["START"].update(disabled=True)
+
             # collect the inputs into meaningful variables
             if values[0]:
                 net_type = "shallow_mlp"
@@ -147,8 +174,6 @@ if __name__ == "__main__":
             save_model = values[15]
 
             # packing the arguments for the main function
-            args = (window,)
-
             kwargs = {
                 "net_type": net_type,
                 "optimizer": optimizer,
@@ -159,14 +184,14 @@ if __name__ == "__main__":
                 "lr": lr,
                 "device": device,
                 "savefig": savefig,
-                "save_model": save_model
+                "save_model": save_model,
+                "L_return": L_return
             }
 
             # multithread is used for being able to terminate the program closing the window
-            threading.Thread(target=start_program, args=args, kwargs=kwargs, daemon=True).start()
-            
-            window.Refresh()
-        
+            thread = threading.Thread(target=start_program, kwargs=kwargs, daemon=True)
+            thread.start()
+
         # if the window is closed
         elif event == sg.WIN_CLOSED:
             break
