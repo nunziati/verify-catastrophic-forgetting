@@ -49,7 +49,7 @@ plot_layout = [
         sg.Column([
             [sg.Canvas(key="-CANVAS1-")],
             [sg.Canvas(key="-CANVAS2-")]
-        ], size=(180, 30), expand_x=True, expand_y=True, scrollable=True,  vertical_scroll_only=True)
+        ], size=(180, 30), key="Column", expand_x=True, expand_y=True, scrollable=True,  vertical_scroll_only=True)
     ]
 ]
 
