@@ -120,10 +120,8 @@ class DeepMLP(torch.nn.Module):
             torch.nn.init.normal_(param)
 
 class ShallowCNN(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super(ShallowCNN, self).__init__()
-        
-        self.net_parameters = {}
 
         self.conv1 = MyConv2d(3, 10, kernel_size=5, padding="same")
         self.relu1 = torch.nn.ReLU()
@@ -153,10 +151,8 @@ class ShallowCNN(torch.nn.Module):
             torch.nn.init.normal_(param)
 
 class DeepCNN(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super(DeepCNN, self).__init__()
-        
-        self.net_parameters = {}
 
         self.conv1a = MyConv2d(3, 10, kernel_size=5, padding="same")
         self.relu1a = torch.nn.ReLU()
