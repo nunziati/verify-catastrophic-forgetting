@@ -57,7 +57,7 @@ plot_layout = [
 ]
 
 terminal_layout = [
-    #[sg.Output(size=(80, 24))]
+    [sg.Output(size=(80, 24))]
 ]
 
 layout = [
