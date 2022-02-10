@@ -96,6 +96,7 @@ if __name__ == "__main__":
                                     test_data=test_set_loader,
                                     plot=args["plot"],
                                     savefig=args["savefig"],
+                                    figsize=(15, 12),
                                     subdir="./figures/",
                                     timestamp=timestamp)
     print("Training correctly completed!")

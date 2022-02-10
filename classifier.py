@@ -222,7 +222,7 @@ class Classifier:
 
         # looping over the rows/columns of the history of evaluation computed during training, and plotting them on different subplots
         if subplot == "class":
-            for index, h in enumerate(self.history):
+            for index, h in enumerate(self.history.transpose(0, 1)):
                 ax = f.add_subplot(4, 5, index+1)
                 ax.bar(range(20), h)
                 ax.set_ylim([0, 1])
