@@ -18,12 +18,12 @@ if __name__ == "__main__":
     # selecting the arguments
     args = {
         "model": "shallow_mlp",
-        "optimizer": "sgd",
+        "optimizer": "adam",
         "hidden": 1000,
-        "weight_decay": 0.0,
-        "dropout": 0.0,
-        "batch_size": 64,
-        "lr": 0.001,
+        "weight_decay": 0.03,
+        "dropout": 0.5,
+        "batch_size": 128,
+        "lr": 1e-7,
         "device": "cpu",
         "plot": True,
         "savefig": False,
